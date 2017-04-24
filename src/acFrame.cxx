@@ -1,7 +1,5 @@
 #include "acFrame.h"
 
-#define ID_Hello 1
-
 acFrame::acFrame(wxWindow* parent, wxWindowID id)
 {
 
@@ -10,7 +8,7 @@ acFrame::acFrame(wxWindow* parent, wxWindowID id)
 	//MENUBAR--
 
 	wxMenu * menuFile = new wxMenu;
-	menuFile->Append(ID_Hello, "&New Castle\tCtrl-H", 
+	menuFile->Append(1, "&Hello\tCtrl-H", 
 			"Help string shown in status bar for this menu item");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
@@ -30,52 +28,74 @@ acFrame::acFrame(wxWindow* parent, wxWindowID id)
 	SetStatusText ( "AutoCity v0.0.0" );
 
 	//TOOLBAR--
-	//TODO
+	//TODO- add toolbar functionality
 	
-	acToolBar = this->CreateToolBar( wxTB_HORIZONTAL, wxID_ANY );
-	acToolNew = acToolBar->AddTool( wxID_ANY, wxT("tool"), 
+	m_acToolBar = this->CreateToolBar( wxTB_HORIZONTAL, wxID_ANY );
+	m_acToolNew = m_acToolBar->AddTool( wxID_ANY, wxT("tool"), 
 			wxArtProvider::GetBitmap( wxART_NEW, wxART_TOOLBAR ), 
 			wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL);
 
-	acToolOpen = acToolBar->AddTool( wxID_ANY, wxT("tool"), 
+	m_acToolOpen = m_acToolBar->AddTool( wxID_ANY, wxT("tool"), 
 			wxArtProvider::GetBitmap( wxART_FILE_OPEN, wxART_TOOLBAR ), 
 			wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 		
-	acToolBar->AddSeparator(); 
+	m_acToolBar->AddSeparator(); 
 			
-	acToolSave = acToolBar->AddTool( wxID_ANY, wxT("tool"), 
+	m_acToolSave = m_acToolBar->AddTool( wxID_ANY, wxT("tool"), 
 			wxArtProvider::GetBitmap( wxART_FLOPPY, wxART_TOOLBAR ), 
 			wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 				
-	acToolExport = acToolBar->AddTool( wxID_ANY, wxT("tool"), 
+	m_acToolExport = m_acToolBar->AddTool( wxID_ANY, wxT("tool"), 
 			wxArtProvider::GetBitmap( wxART_HARDDISK, wxART_TOOLBAR ), 
 			wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 					
-	acToolUndo = acToolBar->AddTool( wxID_ANY, wxT("tool"), 
+	m_acToolUndo = m_acToolBar->AddTool( wxID_ANY, wxT("tool"), 
 			wxArtProvider::GetBitmap( wxART_UNDO, wxART_TOOLBAR ), 
 			wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 						
-	acToolRedo = acToolBar->AddTool( wxID_ANY, wxT("tool"), 
+	m_acToolRedo = m_acToolBar->AddTool( wxID_ANY, wxT("tool"), 
 			wxArtProvider::GetBitmap( wxART_REDO, wxART_TOOLBAR ), 
 			wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL ); 
 							
+	m_acToolBar->Realize();
 
-	acToolBar->Realize();
+	//SPLITTERWINDOWINITIATION--
 	
+	m_acSplitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition,
+			wxDefaultSize, wxSP_3D);
+	m_acSplitter->Connect( wxEVT_IDLE,
+			wxIdleEventHandler( acFrame::acSplitterOnIdle ), NULL, this);
+
+	//PROPERTYGRID--
+	//TODO
+
+	m_acProperty = new wxPropertyGrid(m_acSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+			wxPG_AUTO_SORT | wxPG_SPLITTER_AUTO_CENTER | wxPG_DEFAULT_STYLE);
+	m_acProperty->Append(new wxIntProperty("Number of Houses", wxPG_LABEL, 50));
+	m_acProperty->Append(new wxDirProperty("Output Folder", wxPG_LABEL, ::wxGetUserHome()));
+
+
+	//WXGLCANVAS--
+	//TODO	
+
+	int GLCanvasAttributes_1[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16,
+		WX_GL_STENCIL_SIZE, 0, 0, 0};
+
+	m_acGLCanvas = new wxGLCanvas(m_acSplitter, wxID_ANY,GLCanvasAttributes_1,
+			wxPoint(216,224),wxDefaultSize, 0, _T("ID_GLCANVAS1"));
+
 	//SPLITTERWINDOW--
 
-	wxBoxSizer* randomsizer;
-	randomsizer = new wxBoxSizer( wxVERTICAL );
+	m_randomsizer = new wxBoxSizer( wxVERTICAL );
 
-	acSplitter = new wxSplitterWindow( this, wxID_ANY, 
-			wxDefaultPosition, wxDefaultSize, wxSP_3D );
-	acSplitter->Connect( wxEVT_IDLE, 
-			wxIdleEventHandler( acFrame::acSplitterOnIdle ), NULL, this );
-
-	randomsizer->Add( acSplitter, 1, wxEXPAND, 5);
+	m_acSplitter->SplitVertically(m_acProperty, m_acGLCanvas, 5);
+	//m_randomsizer->Add( acSplitter, 1, wxEXPAND, 5);
+	//TODO: fix splitter first
+	
+	m_randomsizer->Add( m_acSplitter, 1, wxEXPAND, 5);
 
 	//OTHER VITAL STUFF
-	this->SetSizer( randomsizer );
+	this->SetSizer( m_randomsizer );
 	this->Layout();
 	SetSize(800,500);
 	this->Centre( wxBOTH );
@@ -83,7 +103,7 @@ acFrame::acFrame(wxWindow* parent, wxWindowID id)
 
 
 wxBEGIN_EVENT_TABLE(acFrame, wxFrame)
-	    EVT_MENU(ID_Hello,   acFrame::OnHello)
+	    EVT_MENU(1,   acFrame::OnHello)
 	    EVT_MENU(wxID_EXIT,  acFrame::OnExit)
 	    EVT_MENU(wxID_ABOUT, acFrame::OnAbout)
 wxEND_EVENT_TABLE()
@@ -101,5 +121,5 @@ void acFrame::OnAbout(wxCommandEvent& event)
 
 void acFrame::OnHello(wxCommandEvent& event)
 {
-	wxLogMessage("Hello world from wxWidgets");
+	wxMessageBox("Hello world from wxWidgets");
 }
