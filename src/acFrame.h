@@ -10,6 +10,7 @@
 
 #include <wx/wx.h>
 #include <wx/string.h>
+#include <wx/intl.h>
 #include <wx/artprov.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
@@ -32,10 +33,20 @@ class acFrame : public wxFrame
 			m_acSplitter->SetSashPosition( 0 );
 			m_acSplitter->Disconnect( wxEVT_IDLE, wxIdleEventHandler( acFrame::acSplitterOnIdle ), NULL, this );
 		}
+
+		void InitializeGL();
+		void renderGL();
+		void resizeGL(int width, int height);
 	protected:
 		void OnHello(wxCommandEvent& event);
 		void OnExit(wxCommandEvent& event);
 		void OnAbout(wxCommandEvent& event);
+
+		void OnResize(wxSizeEvent& event);
+		void OnTimer1Trigger(wxTimerEvent& event);
+
+		wxTimer Timer1;
+		static const long ID_TIMER1;
 
 		wxToolBar* m_acToolBar;
 		wxToolBarToolBase* m_acToolNew;
@@ -48,9 +59,12 @@ class acFrame : public wxFrame
 		wxSplitterWindow* m_acSplitter;
 
 		wxGLCanvas* m_acGLCanvas;
+		wxGLContext* m_acGLContext;
 
 		wxPropertyGrid* m_acProperty;
 		wxBoxSizer* m_randomsizer;
+
+		bool IsResized;
 
 		wxDECLARE_EVENT_TABLE();
 };

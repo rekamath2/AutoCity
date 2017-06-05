@@ -1,5 +1,7 @@
 #include "acFrame.h"
 
+const long acFrame::ID_TIMER1 = wxNewId();
+
 acFrame::acFrame(wxWindow* parent, wxWindowID id)
 {
 
@@ -82,16 +84,14 @@ acFrame::acFrame(wxWindow* parent, wxWindowID id)
 		WX_GL_STENCIL_SIZE, 0, 0, 0};
 
 	m_acGLCanvas = new wxGLCanvas(m_acSplitter, wxID_ANY,GLCanvasAttributes_1,
-			wxPoint(216,224),wxDefaultSize, 0, _T("ID_GLCANVAS1"));
+			wxDefaultPosition ,wxDefaultSize, 0, _T("ID_GLCANVAS1"));
 
 	//SPLITTERWINDOW--
 
+	m_acSplitter->SplitVertically(m_acProperty, m_acGLCanvas, 5);
+
 	m_randomsizer = new wxBoxSizer( wxVERTICAL );
 
-	m_acSplitter->SplitVertically(m_acProperty, m_acGLCanvas, 5);
-	//m_randomsizer->Add( acSplitter, 1, wxEXPAND, 5);
-	//TODO: fix splitter first
-	
 	m_randomsizer->Add( m_acSplitter, 1, wxEXPAND, 5);
 
 	//OTHER VITAL STUFF
@@ -99,6 +99,9 @@ acFrame::acFrame(wxWindow* parent, wxWindowID id)
 	this->Layout();
 	SetSize(800,500);
 	this->Centre( wxBOTH );
+
+	//TODO: Connect events
+	Connect(ID_TIMER1,wxEVT_TIMER,(wxObjectEventFunction)&acFrame::OnTimer1Trigger);
 }
 
 
@@ -107,6 +110,45 @@ wxBEGIN_EVENT_TABLE(acFrame, wxFrame)
 	    EVT_MENU(wxID_EXIT,  acFrame::OnExit)
 	    EVT_MENU(wxID_ABOUT, acFrame::OnAbout)
 wxEND_EVENT_TABLE()
+
+void acFrame::InitializeGL(){
+	m_acGLContext = new wxGLContext(m_acGLCanvas);
+	m_acGLCanvas->SetBackgroundStyle(wxBG_STYLE_CUSTOM);
+	m_acGLCanvas->SetCurrent(*m_acGLContext);
+
+	glClearColor(0.1f, 0.15f, 0.15f, 1.0f);
+	glClearDepth(1.0f);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+
+	IsResized = false;
+}
+
+void acFrame::renderGL()
+{
+	m_acGLCanvas->SetCurrent(*m_acGLContext);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	m_acGLCanvas->SwapBuffers();
+}
+
+void acFrame::resizeGL(int width, int height)
+{
+	m_acGLCanvas->SetSize(width, height);
+	glViewport(0, 0, width, height);
+	IsResized = true;
+}
+
+void acFrame::OnTimer1Trigger(wxTimerEvent& event)
+{
+	if(!IsResized)
+	{
+		resizeGL(this->GetClientSize().GetWidth() / 2,
+			 this->GetClientSize().GetHeight());
+		//TODO: Use sash position for width
+	}
+	renderGL();
+}
 
 void acFrame::OnExit(wxCommandEvent& event)
 {
@@ -122,4 +164,9 @@ void acFrame::OnAbout(wxCommandEvent& event)
 void acFrame::OnHello(wxCommandEvent& event)
 {
 	wxMessageBox("Hello world from wxWidgets");
+}
+
+void acFrame::OnResize(wxSizeEvent& event)
+{
+	IsResized = false;
 }
