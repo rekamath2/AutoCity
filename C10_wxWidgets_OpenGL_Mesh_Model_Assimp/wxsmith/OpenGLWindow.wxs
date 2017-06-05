@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wxsmith>
+	<object class="wxFrame" name="OpenGLWindow">
+		<pos_arg>1</pos_arg>
+		<size_arg>1</size_arg>
+		<handler function="OnClose" entry="EVT_CLOSE" />
+		<handler function="OnResize" entry="EVT_SIZE" />
+		<object class="wxTimer" name="ID_TIMER1" variable="Timer1" member="yes">
+			<interval>16</interval>
+			<handler function="OnTimer1Trigger" entry="EVT_TIMER" />
+		</object>
+		<object class="wxMenuBar" variable="MenuBar1" member="yes">
+			<object class="wxMenu" variable="Menu1" member="yes">
+				<label>&amp;File</label>
+				<object class="wxMenuItem" name="wxID_EXIT" variable="MenuFileQuit" member="yes">
+					<label>Quit</label>
+					<accel>Alt+F4</accel>
+					<help>Quit this application</help>
+					<handler function="OnMenuFileQuitSelected" entry="EVT_MENU" />
+				</object>
+			</object>
+			<object class="wxMenu" variable="Menu5" member="yes">
+				<label>&amp;View</label>
+				<object class="wxMenuItem" name="ID_VIEWFULLSCREEN" variable="MenuViewFullScreen" member="yes">
+					<label>Full / Normal Screen</label>
+					<accel>F1</accel>
+					<handler function="OnMenuViewFullScreenSelected" entry="EVT_MENU" />
+					<checkable>1</checkable>
+				</object>
+				<object class="wxMenuItem" name="ID_VIEWSHOWXYPLANE" variable="MenuViewShowXYPlane" member="yes">
+					<label>Show / Hide X-Y Plane</label>
+					<accel>P</accel>
+					<handler function="OnMenuViewShowXYPlaneSelected" entry="EVT_MENU" />
+					<checkable>1</checkable>
+				</object>
+				<object class="separator" />
+				<object class="wxMenuItem" name="ID_VIEWMODEL1" variable="MenuViewModel1" member="yes">
+					<label>Model 1</label>
+					<accel>1</accel>
+					<help>Show Model 1</help>
+					<handler function="OnMenuViewModel1Selected" entry="EVT_MENU" />
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="ID_VIEWMODEL2" variable="MenuViewModel2" member="yes">
+					<label>Model 2</label>
+					<accel>2</accel>
+					<help>Show Model 2</help>
+					<handler function="OnMenuViewModel2Selected" entry="EVT_MENU" />
+					<radio>1</radio>
+				</object>
+				<object class="wxMenuItem" name="ID_VIEWMODEL3" variable="MenuViewModel3" member="yes">
+					<label>Model 3</label>
+					<accel>3</accel>
+					<help>Show Model 3</help>
+					<handler function="OnMenuViewModel3Selected" entry="EVT_MENU" />
+					<radio>1</radio>
+				</object>
+			</object>
+			<object class="wxMenu" variable="Menu3" member="yes">
+				<label>&amp;Model</label>
+				<object class="wxMenuItem" name="ID_MODELAUTOROTATION" variable="MenuModelAutoRotation" member="yes">
+					<label>Toggle Auto Rotation</label>
+					<accel>R</accel>
+					<help>Toggle automatic rotation or not</help>
+					<handler function="OnMenuModelAutoRotationSelected" entry="EVT_MENU" />
+					<checkable>1</checkable>
+				</object>
+				<object class="separator" />
+				<object class="wxMenuItem" name="ID_MODELROTATEUP" variable="MenuModelRotateUp" member="yes">
+					<label>Rotate Up</label>
+					<accel>I</accel>
+					<help>Rotate up five degree</help>
+					<handler function="OnMenuModelRotateUpSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_MODELROTATEDOWN" variable="MenuModelRotateDown" member="yes">
+					<label>Rotate Down</label>
+					<accel>K</accel>
+					<help>Rotate down five degree</help>
+					<handler function="OnMenuModelRotateDownSelected" entry="EVT_MENU" />
+				</object>
+			</object>
+			<object class="wxMenu" variable="Menu6" member="yes">
+				<label>&amp;Camera</label>
+				<object class="wxMenuItem" name="ID_CAMERALOOKATORIGIN" variable="MenuCameraLookAtOrigin" member="yes">
+					<label>Look at Origin</label>
+					<accel>Ctrl+Home</accel>
+					<handler function="OnMenuCameraLookAtOriginSelected" entry="EVT_MENU" />
+					<checkable>1</checkable>
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERAZOOMIN" variable="MenuCameraZoomIn" member="yes">
+					<label>Zoom In</label>
+					<accel>=</accel>
+					<handler function="OnMenuCameraZoomInSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERAZOOMOUT" variable="MenuCameraZoomOut" member="yes">
+					<label>Zoom Out</label>
+					<accel>-</accel>
+					<handler function="OnMenuCameraZoomOutSelected" entry="EVT_MENU" />
+				</object>
+				<object class="separator" />
+				<object class="wxMenuItem" name="ID_CAMERAMOVELEFT" variable="MenuCameraMoveLeft" member="yes">
+					<label>Move Left</label>
+					<accel>A</accel>
+					<handler function="OnMenuCameraMoveLeftSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERAMOVERIGHT" variable="MenuCameraMoveRight" member="yes">
+					<label>Move Right</label>
+					<accel>D</accel>
+					<handler function="OnMenuCameraMoveRightSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERAMOVEUP" variable="MenuCameraMoveUp" member="yes">
+					<label>Move Up</label>
+					<accel>W</accel>
+					<handler function="OnMenuCameraMoveUpSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERAMOVEDOWN" variable="MenuCameraMoveDown" member="yes">
+					<label>Move Down</label>
+					<accel>S</accel>
+					<handler function="OnMenuCameraMoveDownSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERAMOVEFORWARD" variable="MenuCameraMoveForward" member="yes">
+					<label>Move Forward</label>
+					<accel>Z</accel>
+					<handler function="OnMenuCameraMoveForwardSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERAMOVEBACKWARD" variable="MenuCameraMoveBackward" member="yes">
+					<label>Move Backward</label>
+					<accel>X</accel>
+					<handler function="OnMenuCameraMoveBackwardSelected" entry="EVT_MENU" />
+				</object>
+				<object class="separator" />
+				<object class="wxMenuItem" name="ID_CAMERATILTLEFT" variable="MenuCameraTiltLeft" member="yes">
+					<label>Tilt Left</label>
+					<accel>Ctrl+Left</accel>
+					<handler function="OnMenuCameraTiltLeftSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERATILTRIGHT" variable="MenuCameraTiltRight" member="yes">
+					<label>Tilt Right</label>
+					<accel>Ctrl+Right</accel>
+					<handler function="OnMenuCameraTiltRightSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERATILTUP" variable="MenuCameraTiltUp" member="yes">
+					<label>Tilt Up</label>
+					<accel>Ctrl+Up</accel>
+					<handler function="OnMenuCameraTiltUpSelected" entry="EVT_MENU" />
+				</object>
+				<object class="wxMenuItem" name="ID_CAMERATILTDOWN" variable="MenuCameraTiltDown" member="yes">
+					<label>Tilt Down</label>
+					<accel>CTRL+Down</accel>
+					<handler function="OnMenuCameraTiltDownSelected" entry="EVT_MENU" />
+				</object>
+			</object>
+			<object class="wxMenu" variable="Menu2" member="yes">
+				<label>&amp;Help</label>
+				<object class="wxMenuItem" name="wxID_ABOUT" variable="MenuHelpAbout" member="yes">
+					<label>&amp;About</label>
+					<accel>F12</accel>
+					<help>About this application</help>
+					<handler function="OnMenuHelpAboutSelected" entry="EVT_MENU" />
+				</object>
+			</object>
+		</object>
+		<object class="wxStatusBar" name="ID_STATUSBAR1" variable="StatusBar1" member="yes">
+			<fields>3</fields>
+			<widths>-10,-10,-10</widths>
+			<styles>wxSB_NORMAL,wxSB_NORMAL,wxSB_NORMAL</styles>
+		</object>
+	</object>
+</wxsmith>
