@@ -15,11 +15,13 @@ FIND_PACKAGE(assimp REQUIRED)
 set(HDRS
 	./acApp.h
 	./acFrame.h
+	./acGLFrame.h
 )
  
 set(SRCS
 	./acApp.cxx
 	./acFrame.cxx
+	./acGLFrame.cxx
 )
 
 INCLUDE("${wxWidgets_USE_FILE}")
