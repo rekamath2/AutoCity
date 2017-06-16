@@ -31,9 +31,22 @@ MainWindow::MainWindow(wxFrame* parent)
                         WX_GL_DEPTH_SIZE, 16,
                         0, 0};
 
-    m_GLCanvas = new MwxGLCanvas(this, attribList, wxSize(800,600));
+    m_acSplitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition,
+		    wxDefaultSize, wxSP_3D);
+    m_acProperty = new wxPropertyGrid(m_acSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		    wxPG_AUTO_SORT | wxPG_SPLITTER_AUTO_CENTER | wxPG_DEFAULT_STYLE);
+
+    m_acProperty->Append(new wxIntProperty("Number of Houses", wxPG_LABEL, 50));
+    currentDir = _("./tmp");
+    dirProperty = m_acProperty->Append(new wxDirProperty("OutputFolder", wxPG_LABEL, currentDir));
+
+    m_GLCanvas = new MwxGLCanvas(m_acSplitter, attribList, wxSize(800,600));
     m_GLCanvas->SetMinSize(wxSize(320,240));
-    HBoxSizer->Add(m_GLCanvas, 1, wxEXPAND);
+
+    m_acSplitter->SplitVertically(m_acProperty, m_GLCanvas, 800);
+
+
+    HBoxSizer->Add(m_acSplitter, 1, wxEXPAND);
     SetSizer(HBoxSizer);
     SetAutoLayout(true);
     HBoxSizer->Fit(this);
@@ -48,14 +61,14 @@ MainWindow::MainWindow(wxFrame* parent)
     IsRunning = false;
 
     m_fullScreen        = false;
-    m_autoRotation      = false;
+    m_autoRotation      = true;
     m_camLookAtOrigin   = false;
 
     m_showXYPlane  = true;              // Show X-Y plane by default
     MenuViewShowXYPlane->Check(true);   // Also need to check menu item
 
     m_modelIndex = 0;
-    MenuViewModel1->Check(true);
+    m_ourModel = new Model();
 
     ShowFullScreen(true);       // To enable wxMenu to get key events
     ShowFullScreen(false);
@@ -100,15 +113,82 @@ void MainWindow::OnTimer1Trigger(wxTimerEvent& event)
     else renderGL();    // Before being resized, do not render OpenGL
 }
 
+void MainWindow::OnPropertyGridChanged(wxPropertyGridEvent& event)
+{
+	wxPGProperty* prop = event.GetProperty();
+
+	cout<<"propevent"<<endl;
+	if(!prop)
+		return;
+	wxAny value = prop->GetValue();
+	if(value.IsNull())
+		return;
+	if(prop->GetName() == "OutputFolder")
+		PropDirChange(value.As<wxString>());
+	if(prop->GetName() == "Number of Houses")
+		return;
+}
+
+void MainWindow::PropDirChange(wxString str)
+{
+	string outpath = str.ToStdString();
+	cout<<"dirchanged"<<endl;
+}
+
+void MainWindow::OnMenuEditGenHouse(wxCommandEvent& event)
+{
+	cout<<"genhouse"<<endl;
+	wxAny value = dirProperty->GetValue();
+	string str = value.As<wxString>().ToStdString();
+	m_acEngine = new acHouseEngine();
+	str += "/house.obj";
+	cout<<"givendirectory: " << str << endl;
+	m_acEngine->genHouse(str);
+	delete m_ourModel;
+	m_ourModel = new Model();
+	m_ourModel->loadModel(str, m_shader_3DModel);
+}
+
+void MainWindow::OnMenuEditSaveHouse(wxCommandEvent& event)
+{
+	cout<<"savehouse"<<endl;
+	wxAny value = dirProperty->GetValue();
+	string str = value.As<wxString>().ToStdString();
+	str += "/house.obj";
+
+	wxFileDialog saveFileDialog(this, _("Save House OBJ"), "", "untitled.obj", "OBJ files (*.obj)|*.obj", wxFD_SAVE |
+			wxFD_OVERWRITE_PROMPT);
+
+	if(saveFileDialog.ShowModal() == wxID_CANCEL)
+	{
+		return;
+	}
+	string savepath = saveFileDialog.GetPath().ToStdString();
+
+	//Save file
+	ifstream source(str, ios::binary);
+	ofstream dest(savepath, ios::binary);
+
+	istreambuf_iterator<char> begin_source(source);
+	istreambuf_iterator<char> end_source;
+	ostreambuf_iterator<char> begin_dest(dest);
+	copy(begin_source, end_source, begin_dest);
+
+	source.close();
+	dest.close();
+
+}
+
 void MainWindow::OnMenuHelpAboutSelected(wxCommandEvent& event)
 {
-    wxMessageBox(_("Author: Calvin Liu\nDate  : July 12, 2015"),
-                 _("About This App"),
+    wxMessageBox(_("This is AutoCity v1.1.1"),
+                 _("About AutoCity"),
                  wxOK | wxCENTER | wxICON_INFORMATION);
 }
 
 void MainWindow::OnResize(wxSizeEvent& event)
 {
+    this->Layout();
     IsResized = false;
 }
 
@@ -135,24 +215,6 @@ void MainWindow::OnMenuViewShowXYPlaneSelected(wxCommandEvent& event)
 {
     m_showXYPlane = !m_showXYPlane;
     MenuViewShowXYPlane->Check(m_showXYPlane);
-}
-
-void MainWindow::OnMenuViewModel1Selected(wxCommandEvent& event)
-{
-    m_modelIndex = 0;
-    MenuViewModel1->Check(true);
-}
-
-void MainWindow::OnMenuViewModel2Selected(wxCommandEvent& event)
-{
-    m_modelIndex = 1;
-    MenuViewModel2->Check(true);
-}
-
-void MainWindow::OnMenuViewModel3Selected(wxCommandEvent& event)
-{
-    m_modelIndex = 2;
-    MenuViewModel3->Check(true);
 }
 
 void MainWindow::OnMenuModelAutoRotationSelected(wxCommandEvent& event)
@@ -276,7 +338,7 @@ bool MainWindow::initializeGL()
     cout << "OpenGL Version Supported: " << OGLversion << endl;
     cout << "GLSL Version: " << GLSLversion << endl << endl;
 
-    glClearColor(0.1f, 0.15f, 0.15f, 1.0f);  // Background color when doing glClear
+    glClearColor(0.2f, 0.2f, 0.23f, 1.0f);  // Background color when doing glClear
     glClearDepth(1.0f);                      // Depth buffer when doing glClear
     glDepthFunc(GL_LEQUAL);                  // The type of depth testing to do
     glEnable(GL_DEPTH_TEST);
@@ -342,7 +404,7 @@ bool MainWindow::initLoadModel()
 
     wxString myString;
 
-    myString = wxString(_("../../Models/Cube/Cube.obj"));
+    myString = wxString(_("tmp/Cube.obj"));
     //myString = wxString(_("../../Models/Nanosuit/nanosuit.obj"));
     //myString = wxString(_("../../Models/Pyramids/Triangular_Pyramid_Textured.obj"));
     //myString = wxString(_("../../Models/Pyramids/Regular_and_Triangular_Pyramids_x2_Textured.obj"));
@@ -351,14 +413,14 @@ bool MainWindow::initLoadModel()
 
 #ifdef USE_INTEL_GPU
     // ---------- For GLSL 1.30 ----------
-    if ((m_ourModel[0].loadModel(myString, m_shader_3DModel)) ==  false)
+    if ((m_ourModel->loadModel(myString, m_shader_3DModel)) ==  false)
         errorFlag = true;
 #else
     // ---------- For GLSL 3.30 ----------
-    if ((m_ourModel[0].loadModel(myString)) ==  false)
+    if ((m_ourModel->loadModel(myString)) ==  false)
         errorFlag = true;
 #endif
-
+/*
     //myString = wxString(_("../../Models/Cube/Cube.obj"));
     myString = wxString(_("../../Models/Nanosuit/nanosuit.obj"));
     //myString = wxString(_("../../Models/Pyramids/Triangular_Pyramid_Textured.obj"));
@@ -404,8 +466,8 @@ bool MainWindow::initLoadModel()
     if ((m_ourLamp.loadModel(myString)) ==  false)
         errorFlag = true;
 #endif
-
-    cout << "===> End of loading 3D models (^o^) \n" << endl;
+*/
+    cout << "===> End of loading 3D models :-) \n" << endl;
 
     return !errorFlag;
 }
@@ -433,8 +495,8 @@ bool MainWindow::initLoadXYPlane()
                 Vp[i][j][1] = segmentLength * (float)(i - 5);
                 Vp[i][j][2] = 0.0f;
 
-                // Color ([3] -> r, [4] -> g, [5] -> b)
-                Vp[i][j][3] = Vp[i][j][4] = Vp[i][j][5] = 0.2f;
+                // Color ([5] -> r, [5] -> g, [5] -> b)
+                Vp[i][j][5] = Vp[i][j][5] = Vp[i][j][5] = 0.2f;
 
                 // Point Start ([0] -> x, [1] -> y, [2] -> z)
                 Vp[i + k][j][0] = segmentLength * (float)(i - 5);
@@ -442,8 +504,8 @@ bool MainWindow::initLoadXYPlane()
                 else Vp[i + k][j][1] = 0.0f;
                 Vp[i + k][j][2] = 0.0f;
 
-                // Color ([3] -> r, [4] -> g, [5] -> b)
-                Vp[i + k][j][3] = Vp[i + k][j][4] = Vp[i + k][j][5] = 0.2f;
+                // Color ([5] -> r, [5] -> g, [5] -> b)
+                Vp[i + k][j][5] = Vp[i + k][j][5] = Vp[i + k][j][5] = 0.2f;
             }
             else
             {
@@ -452,16 +514,16 @@ bool MainWindow::initLoadXYPlane()
                 Vp[i][j][1] = segmentLength * (float)(i - 5);
                 Vp[i][j][2] = 0.0f;
 
-                // Color ([3] -> r, [4] -> g, [5] -> b)
-                Vp[i][j][3] = Vp[i][j][4] = Vp[i][j][5] = 0.2f;
+                // Color ([5] -> r, [5] -> g, [5] -> b)
+                Vp[i][j][5] = Vp[i][j][5] = Vp[i][j][5] = 0.4f;
 
                 // Point End ([0] -> x, [1] -> y, [2] -> z)
                 Vp[i + k][j][0] = segmentLength * (float)(i - 5);
                 Vp[i + k][j][1] = -lineLength;
                 Vp[i + k][j][2] = 0.0f;
 
-                // Color ([3] -> r, [4] -> g, [5] -> b)
-                Vp[i + k][j][3] = Vp[i + k][j][4] = Vp[i + k][j][5] = 0.2f;
+                // Color ([5] -> r, [5] -> g, [5] -> b)
+                Vp[i + k][j][5] = Vp[i + k][j][5] = Vp[i + k][j][5] = 0.2f;
             }
         }
     }
@@ -844,7 +906,7 @@ void MainWindow::renderGL()
 
     // Set the lighting uniforms
     glUniform3fv(Loc_viewPos, 1, glm::value_ptr(m_camPos));
-    m_ourModel[m_modelIndex].Draw(m_shader_3DModel);
+    m_ourModel->Draw(m_shader_3DModel);
 
     // Swap the buffers
     m_GLCanvas->SwapBuffers();

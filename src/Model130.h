@@ -1,6 +1,6 @@
 //#pragma once
-#ifndef MODEL330_H            // Added by Calvin.    2014-12-18
-#define MODEL330_H            // Added by Calvin.    2014-12-18
+#ifndef MODEL130_H            // Added by Calvin.    2014-12-18
+#define MODEL130_H            // Added by Calvin.    2014-12-18
 
 // Std. Includes
 #include <string>
@@ -21,13 +21,13 @@ using namespace std;
 #include <assimp/postprocess.h>
 
 #include "Shader.h"
-#include "Mesh330.h"
+#include "Mesh130.h"
 
 //GLint TextureFromFile(const wxString path, wxString directory);
 
 class Model
 {
-    //Shader m_shader;		// No need for GLSL 3.30
+    Shader m_shader;
 
 public:
     /*  Functions   */
@@ -35,12 +35,10 @@ public:
     // Constructor, expects a filepath to a 3D model.
     //Model(GLchar* path)
 
-    //Model(const wxString path, Shader shader) // For GLSL 1.30
-    Model(const wxString path)
+    Model(const wxString path, Shader shader)
     {
-        //m_shader = shader;				// No need for GLSL 3.30
-        //this->loadModel(path, shader);	// No need for GLSL 3.30
-        this->loadModel(path);		// For GLSL 3.30
+        m_shader = shader;
+        this->loadModel(path, shader);
     }
 
     // Draws the model, and thus all its meshes
@@ -52,7 +50,6 @@ public:
         //this->meshes[1].Draw(shader);
     }
 
-
     /*  Model Data  */
     vector<Mesh> meshes;
     wxString directory;
@@ -60,22 +57,25 @@ public:
 
     /*  Functions   */
     // Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-    //void loadModel(wxString path, Shader shader)  // No need for GLSL 3.30
-    bool loadModel(wxString path)                   // For GLSL 3.30
+    bool loadModel(wxString path, Shader shader)
     {
         bool errorFlag = false;
-        //m_shader = shader;  // No need for GLSL 3.30
+        m_shader = shader;
 
         // Read file via ASSIMP
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path.ToStdString(), aiProcess_Triangulate | aiProcess_FlipUVs);
+
+        //const aiScene* scene = importer.ReadFile(path.ToStdString(), aiProcess_Triangulate | aiProcess_FlipUVs);
+        const aiScene* scene = importer.ReadFile(path.ToStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_GenUVCoords);
+
         // Check for errors
-        if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+        if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if Not Zero
         {
             cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
             errorFlag = true;
             return false;
         }
+
         // Retrieve the directory path of the filepath
         this->directory = path.substr(0, path.find_last_of('/'));
 
@@ -90,7 +90,7 @@ private:
     void processNode(aiNode* node, const aiScene* scene)
     {
         // Process each mesh located at the current node
-        for(GLuint i = 0; i < node->mNumMeshes; i++)
+        for (GLuint i = 0; i < node->mNumMeshes; i++)
         {
             // The node object only contains indices to index the actual objects in the scene.
             // The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
@@ -98,7 +98,7 @@ private:
             this->meshes.push_back(this->processMesh(mesh, scene));
         }
         // After we've processed all of the meshes (if any) we then recursively process each of the children nodes
-        for(GLuint i = 0; i < node->mNumChildren; i++)
+        for (GLuint i = 0; i < node->mNumChildren; i++)
         {
             this->processNode(node->mChildren[i], scene);
         }
@@ -112,10 +112,10 @@ private:
         vector<Texture> textures;
 
         // Walk through each of the mesh's vertices
-        for(GLuint i = 0; i < mesh->mNumVertices; i++)
+        for (GLuint i = 0; i < mesh->mNumVertices; i++)       // <-- Segmentation Fault point of Porsche911_PoliceCar
         {
             Vertex vertex;
-            glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly
+            glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly 
                               // convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
             // Positions
             vector.x = mesh->mVertices[i].x;
@@ -123,6 +123,7 @@ private:
             vector.z = mesh->mVertices[i].z;
             vertex.Position = vector;
             //printf("Position : (%10f, %10f, %10f)\n", vector.x, vector.y, vector.z);
+
             // Normals
             vector.x = mesh->mNormals[i].x;
             vector.y = mesh->mNormals[i].y;
@@ -131,7 +132,7 @@ private:
             //printf("Normal   : (%10f, %10f, %10f)\n", vector.x, vector.y, vector.z);
 
             // Texture Coordinates
-            if(mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
+            if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
             {
                 glm::vec2 vec;
                 // A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
@@ -145,16 +146,18 @@ private:
                 vertex.TexCoords = glm::vec2(0.0f, 0.0f);
             vertices.push_back(vertex);
         }
+
         // Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-        for(GLuint i = 0; i < mesh->mNumFaces; i++)
+        for (GLuint i = 0; i < mesh->mNumFaces; i++)
         {
             aiFace face = mesh->mFaces[i];
             // Retrieve all indices of the face and store them in the indices vector
-            for(GLuint j = 0; j < face.mNumIndices; j++)
+            for (GLuint j = 0; j < face.mNumIndices; j++)
                 indices.push_back(face.mIndices[j]);
         }
         // Process materials
-        if(mesh->mMaterialIndex >= 0)
+        //cout << "#####> mesh->mMaterialIndex = " << mesh->mMaterialIndex << endl;
+        if (mesh->mMaterialIndex > 0)
         {
             aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
             // We assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -173,8 +176,7 @@ private:
         }
 
         // Return a mesh object created from the extracted mesh data
-        //return Mesh(vertices, indices, textures, m_shader);	// No need for GLSL 3.30
-        return Mesh(vertices, indices, textures);				// For GLSL 3.30
+        return Mesh(vertices, indices, textures, m_shader);
     }
 
     // Checks all material textures of a given type and loads the textures if they're not loaded yet.
@@ -182,7 +184,7 @@ private:
     vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, wxString typeName)
     {
         vector<Texture> textures;
-        for(GLuint i = 0; i < mat->GetTextureCount(type); i++)
+        for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
         {
             aiString str;
             mat->GetTexture(type, i, &str);
@@ -191,7 +193,7 @@ private:
             GLboolean skip = false;
             for (GLuint j = 0; j < textures_loaded.size(); j++)
             {
-                if(textures_loaded[j].path == str)
+                if (textures_loaded[j].path == str)
                 {
                     textures.push_back(textures_loaded[j]);
                     skip = true; // A texture with the same filepath has already been loaded, continue to next one. (optimization)
@@ -216,9 +218,10 @@ private:
     GLint TextureFromFile(const wxString path, wxString directory)   // If using GLuint will get "error: ambiguous old declaration", but this does not cause error in Qt.  Calvin.  2015-01-21
     {
         //Generate texture ID and load texture data
-        wxString filename = path;
-        filename = directory + '/' + filename;
-        GLuint textureID;
+        wxString filename = "./tex.png";
+        //filename = directory + '/' + filename;
+        filename = "./tex.png";
+	GLuint textureID;
         glGenTextures(1, &textureID);
         /*
         int width,height;
@@ -251,25 +254,25 @@ private:
 
         // ------====== TEXTURE 1 ====== ------
         // Load, create texture and generate mipmaps
-        wxBitmap bmp1;
+        wxBitmap bmp;
 
         //if (!bmp1.LoadFile(_("../../Images/wall.jpg"))) // Check your file path
-        if (!bmp1.LoadFile(filename)) // Check your file path  <--------------------------
-        {
-            cout << "Loading image file #1 was failed !!" << endl;
+        if (!bmp.LoadFile(filename)) // Check your file path  <--------------------------
+	{
+            cout << "Loading image file '" << path.ToStdString() << "' was failed !!" << endl;
             return 0;
         }
         else
             cout << "Loading image file '" << path.ToStdString() << "' was successful !!" << endl;
 
-        wxImage image1;
-        image1 = bmp1.ConvertToImage().Mirror(false);  // Flip image vertically
-        //image1 = bmp1.ConvertToImage().Mirror(true);  // Flip image vertically
+        wxImage image;
+        image = bmp.ConvertToImage().Mirror(false);  // Flip image vertically
+        //image1 = bmp1.ConvertToImage().Mirror(true);  // Flip image horizontally
 
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,           // Upload texture1
-                     image1.GetWidth(), image1.GetHeight(),
-                     0, GL_RGB, GL_UNSIGNED_BYTE, image1.GetData());
+                     image.GetWidth(), image.GetHeight(),
+                     0, GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
         glGenerateMipmap(GL_TEXTURE_2D);                // Create mipmap
 
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done
@@ -281,4 +284,4 @@ private:
     }
 };
 
-#endif	// MODEL330_H		// Added by Calvin.  2014-12-18
+#endif	// MODEL130_H		// Added by Calvin.  2014-12-18

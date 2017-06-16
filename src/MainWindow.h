@@ -10,17 +10,32 @@
 #ifdef USE_INTEL_GPU
 #include "Model130.h"       // For GLSL 1.30
 #else
-#include "Model330.h"       // For GLSL 3.30
+#include "Model130.h"       // For GLSL 3.30
 #endif
+
+#include <iostream>
+#include <fstream>
+#include <algorithm>
+#include <iterator>
+
+#include <wx/splitter.h>
+#include <wx/propgrid/propgrid.h>
+#include <wx/wx.h>
+#include <wx/stdpaths.h>
+#include <wx/filedlg.h>
 
 // GLM Mathematics
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "acHouseEngine.h"
 
 class MainWindow : public OpenGLWindow
 {
+
+    wxString currentDir;
+
     GLuint m_VAO_ID;                // Uncomment this line later
     GLuint m_VBO_ID;                // Uncomment this line later
     GLuint m_EBO_ID;                // Uncomment this line later
@@ -32,8 +47,11 @@ class MainWindow : public OpenGLWindow
     Shader          m_shader_XYPlane;
     Shader          m_shader_UniformColor;          // For specular lighting
     Shader          m_shader_3DModel;       // Uncomment this line later
-    Model           m_ourModel[3];
+    Model*           m_ourModel;
     Model           m_ourLamp;
+
+    wxSplitterWindow* m_acSplitter;
+    wxPGProperty* dirProperty;
 
     bool IsRunning;
     bool IsResized;
@@ -68,9 +86,9 @@ class MainWindow : public OpenGLWindow
         camTiltLeft, camTiltRight, camTiltUp, camTiltDown
     };
 
-    static const float PI = 3.1415927f;
-    static const float PI_over_180 = 3.1415927f / 180.0f;
-    static const int keyNumber = 10;
+    static constexpr float PI = 3.1415927f;
+    static constexpr float PI_over_180 = 3.1415927f / 180.0f;
+    static constexpr int keyNumber = 10;
     bool keys[keyNumber];
 
     void Update_Camera_Movement(float t);     // Calculate camera movement
@@ -91,11 +109,17 @@ protected:
     bool initLoadShader();
     bool initLoadModel();
     bool initLoadXYPlane();
-    //bool initLoadTexture();
 
 private:
     // ---------- Event Handlers ----------
 	void OnTimer1Trigger(wxTimerEvent& event);
+
+	void OnPropertyGridChanged(wxPropertyGridEvent& event);
+	void PropDirChange(wxString str);
+
+	void OnMenuEditGenHouse(wxCommandEvent& event);
+	void OnMenuEditSaveHouse(wxCommandEvent& event);
+
 	void OnResize(wxSizeEvent& event);
 	void OnClose(wxCloseEvent& event);
 	void OnMenuFileQuitSelected(wxCommandEvent& event);
@@ -118,9 +142,8 @@ private:
 	void OnMenuCameraTiltRightSelected(wxCommandEvent& event);
 	void OnMenuCameraTiltUpSelected(wxCommandEvent& event);
 	void OnMenuCameraTiltDownSelected(wxCommandEvent& event);
-    void OnMenuViewModel1Selected(wxCommandEvent& event);
-    void OnMenuViewModel2Selected(wxCommandEvent& event);
-    void OnMenuViewModel3Selected(wxCommandEvent& event);
+
+	acHouseEngine *m_acEngine;
 };
 
 #endif // MAINWINDOW_H

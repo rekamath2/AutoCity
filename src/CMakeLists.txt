@@ -7,21 +7,32 @@ if(NOT wxWidgets_FOUND)
 	message(SEND_ERROR "Couldn't find wxWidgets")
 endif()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
-FIND_PACKAGE(GLUT REQUIRED)
-FIND_PACKAGE(assimp REQUIRED)
+FIND_PACKAGE(ASSIMP REQUIRED)
+FIND_PACKAGE(CGAL REQUIRED)
+FIND_PACKAGE(GLM REQUIRED)
 
 set(HDRS
-	./acApp.h
-	./acFrame.h
-	./acGLFrame.h
+	./MainWindow.h
+	./Mesh130.h
+	./Mesh.h
+	./Model130.h
+	./Model.h
+	./MwxGLCanvas_Mouse.h
+	./OpenGLWindow.h
+	./Shader.h
+	./acHouseEngine.h
 )
  
 set(SRCS
-	./acApp.cxx
-	./acFrame.cxx
-	./acGLFrame.cxx
+	./main.cpp
+	./MainWindow.cpp
+	./MwxGLCanvas_Mouse.cpp
+	./OpenGLWindow.cpp
+	./acHouseEngine.cxx
 )
 
 INCLUDE("${wxWidgets_USE_FILE}")
@@ -30,7 +41,7 @@ add_executable(autocity ${HDRS} ${SRCS})
  
 set_target_properties(autocity PROPERTIES DEBUG_POSTFIX _d)
 
-include_directories(${OPENGL_INCLUDE_DIRS} ${assimp_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIRS} ${ASSIMP_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${CGAL_INCLUDE_DIR})
 
 target_link_libraries(autocity ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY}
-	${assimp_LIBRARY})
+	${ASSIMP_LIBRARIES} ${CGAL_LIBRARIES})

@@ -1,17 +1,14 @@
 #include "OpenGLWindow.h"
 
 //(*InternalHeaders(OpenGLWindow)
-#include <wx/intl.h>
 #include <wx/string.h>
+#include <wx/intl.h>
 //*)
 
 //(*IdInit(OpenGLWindow)
 const long OpenGLWindow::ID_TIMER1 = wxNewId();
 const long OpenGLWindow::ID_VIEWFULLSCREEN = wxNewId();
 const long OpenGLWindow::ID_VIEWSHOWXYPLANE = wxNewId();
-const long OpenGLWindow::ID_VIEWMODEL1 = wxNewId();
-const long OpenGLWindow::ID_VIEWMODEL2 = wxNewId();
-const long OpenGLWindow::ID_VIEWMODEL3 = wxNewId();
 const long OpenGLWindow::ID_MODELAUTOROTATION = wxNewId();
 const long OpenGLWindow::ID_MODELROTATEUP = wxNewId();
 const long OpenGLWindow::ID_MODELROTATEDOWN = wxNewId();
@@ -29,6 +26,9 @@ const long OpenGLWindow::ID_CAMERATILTRIGHT = wxNewId();
 const long OpenGLWindow::ID_CAMERATILTUP = wxNewId();
 const long OpenGLWindow::ID_CAMERATILTDOWN = wxNewId();
 const long OpenGLWindow::ID_STATUSBAR1 = wxNewId();
+const long OpenGLWindow::ID_GENHOUSE = wxNewId();
+const long OpenGLWindow::ID_SAVEHOUSE = wxNewId();
+const long OpenGLWindow::ID_PROPDIR = wxNewId();
 //*)
 
 BEGIN_EVENT_TABLE(OpenGLWindow,wxFrame)
@@ -54,14 +54,16 @@ OpenGLWindow::OpenGLWindow(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 	Menu5->Append(MenuViewFullScreen);
 	MenuViewShowXYPlane = new wxMenuItem(Menu5, ID_VIEWSHOWXYPLANE, _("Show / Hide X-Y Plane\tP"), wxEmptyString, wxITEM_CHECK);
 	Menu5->Append(MenuViewShowXYPlane);
-	Menu5->AppendSeparator();
-	MenuViewModel1 = new wxMenuItem(Menu5, ID_VIEWMODEL1, _("Model 1\t1"), _("Show Model 1"), wxITEM_RADIO);
-	Menu5->Append(MenuViewModel1);
-	MenuViewModel2 = new wxMenuItem(Menu5, ID_VIEWMODEL2, _("Model 2\t2"), _("Show Model 2"), wxITEM_RADIO);
-	Menu5->Append(MenuViewModel2);
-	MenuViewModel3 = new wxMenuItem(Menu5, ID_VIEWMODEL3, _("Model 3\t3"), _("Show Model 3"), wxITEM_RADIO);
-	Menu5->Append(MenuViewModel3);
 	MenuBar1->Append(Menu5, _("&View"));
+
+	Menu4 = new wxMenu();
+	MenuGenHouse = new wxMenuItem(Menu4, ID_GENHOUSE, _("Generate House\tCtrl+N"), _("Generate New House"), wxITEM_NORMAL);
+	Menu4->Append(MenuGenHouse);
+	MenuSaveHouse = new wxMenuItem(Menu4, ID_SAVEHOUSE, _("Save Current House\tCtrl+S"), _("Save House"), wxITEM_NORMAL);
+	Menu4->Append(MenuSaveHouse);
+
+	MenuBar1->Append(Menu4, _("&Edit"));
+
 	Menu3 = new wxMenu();
 	MenuModelAutoRotation = new wxMenuItem(Menu3, ID_MODELAUTOROTATION, _("Toggle Auto Rotation\tR"), _("Toggle automatic rotation or not"), wxITEM_CHECK);
 	Menu3->Append(MenuModelAutoRotation);
@@ -117,9 +119,6 @@ OpenGLWindow::OpenGLWindow(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 	Connect(wxID_EXIT,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuFileQuitSelected);
 	Connect(ID_VIEWFULLSCREEN,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuViewFullScreenSelected);
 	Connect(ID_VIEWSHOWXYPLANE,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuViewShowXYPlaneSelected);
-	Connect(ID_VIEWMODEL1,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuViewModel1Selected);
-	Connect(ID_VIEWMODEL2,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuViewModel2Selected);
-	Connect(ID_VIEWMODEL3,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuViewModel3Selected);
 	Connect(ID_MODELAUTOROTATION,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuModelAutoRotationSelected);
 	Connect(ID_MODELROTATEUP,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuModelRotateUpSelected);
 	Connect(ID_MODELROTATEDOWN,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuModelRotateDownSelected);
@@ -139,7 +138,15 @@ OpenGLWindow::OpenGLWindow(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 	Connect(wxID_ABOUT,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuHelpAboutSelected);
 	Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&OpenGLWindow::OnClose);
 	Connect(wxEVT_SIZE,(wxObjectEventFunction)&OpenGLWindow::OnResize);
+
+	Connect(ID_GENHOUSE, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuEditGenHouse);
+	Connect(ID_SAVEHOUSE, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuEditSaveHouse);
+	Connect(ID_PROPDIR, wxEVT_PG_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnPropertyGridChanged);
 	//*)
+}
+
+void OpenGLWindow::OnPropertyGridChanged(wxPropertyGridEvent& event)
+{
 }
 
 OpenGLWindow::~OpenGLWindow()
@@ -175,19 +182,6 @@ void OpenGLWindow::OnMenuViewFullScreenSelected(wxCommandEvent& event)
 void OpenGLWindow::OnMenuViewShowXYPlaneSelected(wxCommandEvent& event)
 {
 }
-
-void OpenGLWindow::OnMenuViewModel1Selected(wxCommandEvent& event)
-{
-}
-
-void OpenGLWindow::OnMenuViewModel2Selected(wxCommandEvent& event)
-{
-}
-
-void OpenGLWindow::OnMenuViewModel3Selected(wxCommandEvent& event)
-{
-}
-
 
 void OpenGLWindow::OnMenuModelAutoRotationSelected(wxCommandEvent& event)
 {
@@ -252,4 +246,11 @@ void OpenGLWindow::OnMenuCameraTiltUpSelected(wxCommandEvent& event)
 void OpenGLWindow::OnMenuCameraTiltDownSelected(wxCommandEvent& event)
 {
 }
-            
+
+void OpenGLWindow::OnMenuEditGenHouse(wxCommandEvent& event)
+{
+}
+
+void OpenGLWindow::OnMenuEditSaveHouse(wxCommandEvent& event)
+{
+}
