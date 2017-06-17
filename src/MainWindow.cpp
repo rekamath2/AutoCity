@@ -36,9 +36,23 @@ MainWindow::MainWindow(wxFrame* parent)
     m_acProperty = new wxPropertyGrid(m_acSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		    wxPG_AUTO_SORT | wxPG_SPLITTER_AUTO_CENTER | wxPG_DEFAULT_STYLE);
 
-    m_acProperty->Append(new wxIntProperty("Number of Houses", wxPG_LABEL, 50));
-    currentDir = _("./tmp");
-    dirProperty = m_acProperty->Append(new wxDirProperty("OutputFolder", wxPG_LABEL, currentDir));
+    m_acProperty->Append(new wxPropertyCategory("Base Dimension Constraints"));
+    minWidth  = m_acProperty->Append(new wxFloatProperty("Min Width ",wxPG_LABEL, 1.0f));
+    maxWidth  = m_acProperty->Append(new wxFloatProperty("Max Width ",wxPG_LABEL, 2.0f));
+    minLength = m_acProperty->Append(new wxFloatProperty("Min Length",wxPG_LABEL, 2.0f));
+    maxLength = m_acProperty->Append(new wxFloatProperty("Max Length",wxPG_LABEL, 4.0f));
+    minHeight = m_acProperty->Append(new wxFloatProperty("Min Height",wxPG_LABEL, 1.0f));
+    maxHeight = m_acProperty->Append(new wxFloatProperty("Max Height",wxPG_LABEL, 2.0f));
+
+    m_acProperty->Append(new wxPropertyCategory("Roof Dimension Constraints"));
+    rHeight = m_acProperty->Append(new wxFloatProperty("Roof Height",wxPG_LABEL, 0.5f));
+    rOverh = m_acProperty->Append(new wxFloatProperty("Roof Overhang",wxPG_LABEL, 0.1f));
+
+    m_acProperty->Append(new wxPropertyCategory("Protrusion Dimension Constraints"));
+    pmaxLength = m_acProperty->Append(new wxFloatProperty("Protrusion Max Length",wxPG_LABEL,0.75));
+    pmaxWidth =  m_acProperty->Append(new wxFloatProperty("Protrusion Max Width ",wxPG_LABEL,2.5));
+    pminLength = m_acProperty->Append(new wxFloatProperty("Protrusion Min Length",wxPG_LABEL,0.5));
+    pminWidth =  m_acProperty->Append(new wxFloatProperty("Protrusion Min Width ",wxPG_LABEL,1.0));
 
     m_GLCanvas = new MwxGLCanvas(m_acSplitter, attribList, wxSize(800,600));
     m_GLCanvas->SetMinSize(wxSize(320,240));
@@ -53,8 +67,6 @@ MainWindow::MainWindow(wxFrame* parent)
     HBoxSizer->SetSizeHints(this);
 
     SetTitle(_("wxWidgets OpenGL, Mesh & Model Classes, and Assimp Library"));
-    //SetTitle(_("Mesh & Model Classes, and Assimp Library -- Specular"));
-    //SetClientSize(800, 600);
     SetClientSize(800, 600);
     Center();    // Move the whole window at the center of your screen
 
@@ -73,17 +85,11 @@ MainWindow::MainWindow(wxFrame* parent)
     ShowFullScreen(true);       // To enable wxMenu to get key events
     ShowFullScreen(false);
 
-    //m_textureIndex = 0;
-    //m_angle = 30;       // Rotate model down 30 degree at the beginning
     m_angle = 0;
 
     // ---------- For Camera Movement ----------------------------
-    //m_camFOVy = 45.0f;        // 45 degrees for GLM 0.9.5 (Ubuntu 14.x / Linux Mint 17.x)
     m_camFOVy = 0.7854f;        // 45 degrees for GLM 0.9.7 (Ubuntu 16.x / Linux Mint 18.x)
 
-    //m_camPos = glm::vec3(4.0f, 0.0f, 2.0f);
-    //m_camPos = glm::vec3(4.0f, 3.0f, 3.0f);
-    //m_camPos = glm::vec3(4.0f, 0.0f, 0.0f);
     m_camPos = glm::vec3(7.0f);
 
     Reset_Camera_Front(-m_camPos);      // Reet camera front vector
@@ -92,6 +98,7 @@ MainWindow::MainWindow(wxFrame* parent)
 
     IsViewProjChanged = false;
     // -----------------------------------------------------------
+    m_acSplitter->SetSashPosition(300);
 }
 
 MainWindow::~MainWindow()
@@ -137,24 +144,33 @@ void MainWindow::PropDirChange(wxString str)
 
 void MainWindow::OnMenuEditGenHouse(wxCommandEvent& event)
 {
-	cout<<"genhouse"<<endl;
-	wxAny value = dirProperty->GetValue();
-	string str = value.As<wxString>().ToStdString();
+	wxAny value1 = minWidth->GetValue();
+	wxAny value2 = maxWidth->GetValue();
+	wxAny value3 = minLength->GetValue();
+	wxAny value4 = maxLength->GetValue();
+	wxAny value5 = minHeight->GetValue();
+	wxAny value6 = maxHeight->GetValue();
+	wxAny value7 = rHeight->GetValue();
+	wxAny value8 = rOverh->GetValue();
+	wxAny value9 = pminWidth->GetValue();
+	wxAny value10 = pmaxWidth->GetValue();
+	wxAny value11 = pminLength->GetValue();
+	wxAny value12 = pmaxLength->GetValue();
+	Constraints c(value1.As<double>(),value2.As<double>(),value3.As<double>(),
+			value4.As<double>(),value5.As<double>(),value6.As<double>(),
+			value7.As<double>(), value8.As<double>(),
+			value9.As<double>(), value10.As<double>(),
+			value11.As<double>(), value12.As<double>());
 	m_acEngine = new acHouseEngine();
-	str += "/house.obj";
-	cout<<"givendirectory: " << str << endl;
-	m_acEngine->genHouse(str);
+	m_acEngine->genHouse(c);
 	delete m_ourModel;
 	m_ourModel = new Model();
-	m_ourModel->loadModel(str, m_shader_3DModel);
+	m_ourModel->loadModel("./tmp/house.obj", m_shader_3DModel);
 }
 
 void MainWindow::OnMenuEditSaveHouse(wxCommandEvent& event)
 {
-	cout<<"savehouse"<<endl;
-	wxAny value = dirProperty->GetValue();
-	string str = value.As<wxString>().ToStdString();
-	str += "/house.obj";
+	string str = "./tmp/house.obj";
 
 	wxFileDialog saveFileDialog(this, _("Save House OBJ"), "", "untitled.obj", "OBJ files (*.obj)|*.obj", wxFD_SAVE |
 			wxFD_OVERWRITE_PROMPT);

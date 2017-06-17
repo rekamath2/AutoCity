@@ -25,6 +25,7 @@ set(HDRS
 	./OpenGLWindow.h
 	./Shader.h
 	./acHouseEngine.h
+	./Constraints.h
 )
  
 set(SRCS
@@ -33,6 +34,7 @@ set(SRCS
 	./MwxGLCanvas_Mouse.cpp
 	./OpenGLWindow.cpp
 	./acHouseEngine.cxx
+	./Constraints.cxx
 )
 
 INCLUDE("${wxWidgets_USE_FILE}")

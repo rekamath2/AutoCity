@@ -13,6 +13,8 @@
 #include "Model130.h"       // For GLSL 3.30
 #endif
 
+#include "Constraints.h"
+
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -51,7 +53,18 @@ class MainWindow : public OpenGLWindow
     Model           m_ourLamp;
 
     wxSplitterWindow* m_acSplitter;
-    wxPGProperty* dirProperty;
+    wxPGProperty* minWidth;
+    wxPGProperty* maxWidth;
+    wxPGProperty* minLength;
+    wxPGProperty* maxLength;
+    wxPGProperty* minHeight;
+    wxPGProperty* maxHeight;
+    wxPGProperty* rHeight;
+    wxPGProperty* rOverh;
+    wxPGProperty* pmaxLength;
+    wxPGProperty* pmaxWidth;
+    wxPGProperty* pminLength;
+    wxPGProperty* pminWidth;
 
     bool IsRunning;
     bool IsResized;
