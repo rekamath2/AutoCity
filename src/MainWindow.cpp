@@ -66,7 +66,7 @@ MainWindow::MainWindow(wxFrame* parent)
     HBoxSizer->Fit(this);
     HBoxSizer->SetSizeHints(this);
 
-    SetTitle(_("wxWidgets OpenGL, Mesh & Model Classes, and Assimp Library"));
+    SetTitle(_("AutoCity"));
     SetClientSize(800, 600);
     Center();    // Move the whole window at the center of your screen
 
