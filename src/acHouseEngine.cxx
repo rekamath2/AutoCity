@@ -93,6 +93,7 @@ vector<Point> acHouseEngine::protPoints(vector<Point> basepoints)
 	double pw = randomD(c->getPMinWidth(),c->getPMaxWidth());
 	double pl = randomD(c->getPMinLength(),c->getPMaxLength());
 	double rh = c->getRHeight();
+	double ro = c->getROverh();
 
 	protpoints.push_back(Point(0.0,x - pl,0.0));//bottom right front
 	protpoints.push_back(Point(-pw,x - pl,h));//top left front
@@ -103,13 +104,13 @@ vector<Point> acHouseEngine::protPoints(vector<Point> basepoints)
 	protpoints.push_back(Point(0.0,x + pl,0.0));//bottom right back
 	protpoints.push_back(Point(0.0,x + pl,h));//top right back
 
-	protpoints.push_back(Point(0.0,x - pl,h));//bottom right front
+	protpoints.push_back(Point(0.0,x - pl - ro,h));//bottom right front
 	protpoints.push_back(Point(-pw,x     ,h + rh));// top left front
-	protpoints.push_back(Point(-pw,x - pl,h));// bottom left front
-	protpoints.push_back(Point(-pw,x + pl,h));//bottom left back
+	protpoints.push_back(Point(-pw,x - pl - ro,h));// bottom left front
+	protpoints.push_back(Point(-pw,x + pl + ro,h));//bottom left back
 	protpoints.push_back(Point(0.0,x     ,h + rh));// top right front
 	protpoints.push_back(Point(-pw,x     ,h + rh));// top left back
-	protpoints.push_back(Point(0.0,x + pl,h));//bottom right back
+	protpoints.push_back(Point(0.0,x + pl + ro,h));//bottom right back
 	protpoints.push_back(Point(0.0,x     ,h + rh));//top right back
 
 	return protpoints;
