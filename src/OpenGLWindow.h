@@ -48,6 +48,8 @@ class OpenGLWindow: public wxFrame
 		wxMenu* Menu4;
 		wxMenuItem* MenuGenHouse;
 		wxMenuItem* MenuSaveHouse;
+		wxMenuItem* MenuGenBuilding;
+		wxMenuItem* MenuSaveBuilding;
 		//*)
 
 	protected:
@@ -75,6 +77,8 @@ class OpenGLWindow: public wxFrame
 		static const long ID_STATUSBAR1;
 		static const long ID_GENHOUSE;
 		static const long ID_SAVEHOUSE;
+		static const long ID_GENBUILD;
+		static const long ID_SAVEBUILD;
 
 		static const long ID_PROPDIR;
 		//*)
@@ -109,6 +113,9 @@ class OpenGLWindow: public wxFrame
 
 		virtual void OnMenuEditGenHouse(wxCommandEvent& event);
 		virtual void OnMenuEditSaveHouse(wxCommandEvent& event);
+
+		virtual void OnMenuEditGenBuild(wxCommandEvent& event);
+		virtual void OnMenuEditSaveBuild(wxCommandEvent& event);
 
 		virtual void OnPropertyGridChanged(wxPropertyGridEvent& event);
 		//*)

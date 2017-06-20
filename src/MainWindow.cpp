@@ -34,7 +34,7 @@ MainWindow::MainWindow(wxFrame* parent)
     m_acSplitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition,
 		    wxDefaultSize, wxSP_3D);
     m_acProperty = new wxPropertyGrid(m_acSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		    wxPG_AUTO_SORT | wxPG_SPLITTER_AUTO_CENTER | wxPG_DEFAULT_STYLE);
+		    wxPG_SPLITTER_AUTO_CENTER | wxPG_DEFAULT_STYLE);
 
     m_acProperty->Append(new wxPropertyCategory("Base Dimension Constraints"));
     minWidth  = m_acProperty->Append(new wxFloatProperty("Min Width ",wxPG_LABEL, 1.0f));
@@ -53,6 +53,13 @@ MainWindow::MainWindow(wxFrame* parent)
     pmaxWidth =  m_acProperty->Append(new wxFloatProperty("Protrusion Max Width ",wxPG_LABEL,2.5));
     pminLength = m_acProperty->Append(new wxFloatProperty("Protrusion Min Length",wxPG_LABEL,0.5));
     pminWidth =  m_acProperty->Append(new wxFloatProperty("Protrusion Min Width ",wxPG_LABEL,1.0));
+
+    m_acProperty->Append(new wxPropertyCategory("Building Dimension Constraints"));
+    bminHeight = m_acProperty->Append(new wxFloatProperty("Building Min Height",wxPG_LABEL,3.0));
+    bmaxHeight = m_acProperty->Append(new wxFloatProperty("Building Max Height",wxPG_LABEL,5.0));
+    bminSide = m_acProperty->Append(new wxFloatProperty("Min Bottom Side Length",wxPG_LABEL,1.0));
+    bmaxSide = m_acProperty->Append(new wxFloatProperty("Max Top Side Length",wxPG_LABEL,0.5));
+    bSteps = m_acProperty->Append(new wxIntProperty("Number of Steps",wxPG_LABEL,5));
 
     m_GLCanvas = new MwxGLCanvas(m_acSplitter, attribList, wxSize(800,600));
     m_GLCanvas->SetMinSize(wxSize(320,240));
@@ -182,6 +189,46 @@ void MainWindow::OnMenuEditSaveHouse(wxCommandEvent& event)
 	string savepath = saveFileDialog.GetPath().ToStdString();
 
 	//Save file
+	ifstream source(str, ios::binary);
+	ofstream dest(savepath, ios::binary);
+
+	istreambuf_iterator<char> begin_source(source);
+	istreambuf_iterator<char> end_source;
+	ostreambuf_iterator<char> begin_dest(dest);
+	copy(begin_source, end_source, begin_dest);
+
+	source.close();
+	dest.close();
+
+}
+
+void MainWindow::OnMenuEditGenBuild(wxCommandEvent& event)
+{
+	wxAny value1 = bminHeight->GetValue();
+	wxAny value2 = bmaxHeight->GetValue();
+	wxAny value3 = bminSide->GetValue();
+	wxAny value4 = bmaxSide->GetValue();
+	wxAny value5 = bSteps->GetValue();
+	Constraints c(value1.As<double>(), value2.As<double>(), value3.As<double>(),
+			value4.As<double>(), value5.As<int>());
+	m_acEngine = new acHouseEngine();
+	m_acEngine->genBuild(c);
+	delete m_ourModel;
+	m_ourModel = new Model();
+	m_ourModel->loadModel("./tmp/building.obj", m_shader_3DModel);
+}
+
+void MainWindow::OnMenuEditSaveBuild(wxCommandEvent& event)
+{
+
+	string str = "./tmp/building.obj";
+	wxFileDialog saveFileDialog(this, _("Save Building OBJ"), "", "untitled.obj", "OBJ files (*.obj)|*.obj", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	if(saveFileDialog.ShowModal() == wxID_CANCEL)
+	{
+		return;
+	}
+	string savepath = saveFileDialog.GetPath().ToStdString();
+
 	ifstream source(str, ios::binary);
 	ofstream dest(savepath, ios::binary);
 

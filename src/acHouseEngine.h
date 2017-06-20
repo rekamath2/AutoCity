@@ -25,6 +25,7 @@ class acHouseEngine
 		virtual ~acHouseEngine();
 
 		void genHouse(Constraints c);
+		void genBuild(Constraints c);
 
 	private:
 		Constraints *c;
@@ -33,6 +34,7 @@ class acHouseEngine
 		vector<Point> basePoints(double width, double length, double height);
 		vector<Point> roofPoints(vector<Point> basepoints);
 		vector<Point> protPoints(vector<Point> basepoints);
+		vector<Point> bPoints(double height, int steps);
 		double baseWidth();
 		double baseLength();
 		double baseHeight();

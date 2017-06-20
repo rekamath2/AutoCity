@@ -116,6 +116,26 @@ vector<Point> acHouseEngine::protPoints(vector<Point> basepoints)
 	return protpoints;
 }
 
+vector<Point> acHouseEngine::bPoints(double height, int step)
+{
+	vector<Point> bpoints;
+	double xl = -randomD(c->bgetMinSide()/2.0, c->bgetMaxSide()/2.0/step);//left x boundary
+	double xr =  randomD(c->bgetMinSide()/2.0, c->bgetMaxSide()/2.0/step);//right x boundary
+	double yf = -randomD(c->bgetMinSide()/2.0, c->bgetMaxSide()/2.0/step);//front y boundary
+	double yb =  randomD(c->bgetMinSide()/2.0, c->bgetMaxSide()/2.0/step);//back y boundary
+
+	bpoints.push_back(Point(xr,yf,0.0));//bottom right front
+	bpoints.push_back(Point(xl,yf,height));//top left front
+	bpoints.push_back(Point(xl,yf,0.0));//bottom left front
+	bpoints.push_back(Point(xl,yb,0.0));//bottom left back
+	bpoints.push_back(Point(xr,yf,height));//top right front
+	bpoints.push_back(Point(xl,yb,height));//top left back
+	bpoints.push_back(Point(xr,yb,0.0));//bottom right back
+	bpoints.push_back(Point(xr,yb,height));//top right back
+
+	return bpoints;
+}
+
 double acHouseEngine::baseWidth()
 {
 	return randomD(c->getMinWidth(), c->getMaxWidth());
@@ -143,6 +163,23 @@ void acHouseEngine::genHouse(Constraints c)
 	prot.erase(prot.begin(), prot.begin() + 8);
 	make_house(house1, prot);
 	saveHouse("./tmp/house.obj", house1);
+}
+
+void acHouseEngine::genBuild(Constraints c)
+{
+	this->c = &c;
+	Polyhedron build;
+	vector<Point> bpoints;
+
+	int steps = this->c->bgetSteps();
+	double height = randomD(this->c->bgetMinHeight(), this->c->bgetMaxHeight());
+	height /= (double)steps;
+
+	for(int i = 1; i <= steps; i++){
+		make_house(build, bPoints((double)height * i,i));
+	}
+
+	saveHouse("./tmp/building.obj", build);
 }
 
 void acHouseEngine::saveHouse(string path, Polyhedron house)

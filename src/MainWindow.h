@@ -65,6 +65,12 @@ class MainWindow : public OpenGLWindow
     wxPGProperty* pmaxWidth;
     wxPGProperty* pminLength;
     wxPGProperty* pminWidth;
+    
+    wxPGProperty* bminHeight;
+    wxPGProperty* bmaxHeight;
+    wxPGProperty* bminSide;
+    wxPGProperty* bmaxSide;
+    wxPGProperty* bSteps;
 
     bool IsRunning;
     bool IsResized;
@@ -132,6 +138,8 @@ private:
 
 	void OnMenuEditGenHouse(wxCommandEvent& event);
 	void OnMenuEditSaveHouse(wxCommandEvent& event);
+	void OnMenuEditGenBuild(wxCommandEvent& event);
+	void OnMenuEditSaveBuild(wxCommandEvent& event);
 
 	void OnResize(wxSizeEvent& event);
 	void OnClose(wxCloseEvent& event);

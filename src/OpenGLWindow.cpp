@@ -28,6 +28,8 @@ const long OpenGLWindow::ID_CAMERATILTDOWN = wxNewId();
 const long OpenGLWindow::ID_STATUSBAR1 = wxNewId();
 const long OpenGLWindow::ID_GENHOUSE = wxNewId();
 const long OpenGLWindow::ID_SAVEHOUSE = wxNewId();
+const long OpenGLWindow::ID_GENBUILD = wxNewId();
+const long OpenGLWindow::ID_SAVEBUILD = wxNewId();
 const long OpenGLWindow::ID_PROPDIR = wxNewId();
 //*)
 
@@ -61,6 +63,11 @@ OpenGLWindow::OpenGLWindow(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 	Menu4->Append(MenuGenHouse);
 	MenuSaveHouse = new wxMenuItem(Menu4, ID_SAVEHOUSE, _("Save Current House\tCtrl+S"), _("Save House"), wxITEM_NORMAL);
 	Menu4->Append(MenuSaveHouse);
+	Menu4->AppendSeparator();
+	MenuGenBuilding = new wxMenuItem(Menu4, ID_GENBUILD, _("Generate Building\tAlt+N"), _("Generate New Building"), wxITEM_NORMAL);
+	Menu4->Append(MenuGenBuilding);
+	MenuSaveBuilding = new wxMenuItem(Menu4, ID_SAVEBUILD, _("Save Current Building\tAlt+S"), _("Save Building"), wxITEM_NORMAL);
+	Menu4->Append(MenuSaveBuilding);
 
 	MenuBar1->Append(Menu4, _("&Edit"));
 
@@ -141,8 +148,19 @@ OpenGLWindow::OpenGLWindow(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 
 	Connect(ID_GENHOUSE, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuEditGenHouse);
 	Connect(ID_SAVEHOUSE, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuEditSaveHouse);
+	Connect(ID_GENBUILD, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuEditGenBuild);
+	Connect(ID_SAVEBUILD, wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnMenuEditSaveBuild);
+
 	Connect(ID_PROPDIR, wxEVT_PG_SELECTED,(wxObjectEventFunction)&OpenGLWindow::OnPropertyGridChanged);
 	//*)
+}
+
+void OpenGLWindow::OnMenuEditGenBuild(wxCommandEvent& event)
+{
+}
+
+void OpenGLWindow::OnMenuEditSaveBuild(wxCommandEvent& event)
+{
 }
 
 void OpenGLWindow::OnPropertyGridChanged(wxPropertyGridEvent& event)

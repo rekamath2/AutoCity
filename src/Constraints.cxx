@@ -16,6 +16,40 @@ Constraints::Constraints(double minW, double maxW, double minL, double maxL, dou
 {
 }
 
+Constraints::Constraints(double minH, double maxH, double minS, double maxS, int steps) :
+	bminHeight(minH),
+	bmaxHeight(maxH),
+	bminSide(minS),
+	bmaxSide(maxS),
+	bSteps(steps)
+{
+}
+
+double Constraints::bgetMinHeight()
+{
+	return bminHeight;
+}
+
+double Constraints::bgetMaxHeight()
+{
+	return bmaxHeight;
+}
+
+double Constraints::bgetMinSide()
+{
+	return bminSide;
+}
+
+double Constraints::bgetMaxSide()
+{
+	return bmaxSide;
+}
+
+int Constraints::bgetSteps()
+{
+	return bSteps;
+}
+
 double Constraints::getMinWidth()
 {
 	return minWidth;
