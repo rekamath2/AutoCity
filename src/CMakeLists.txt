@@ -29,10 +29,10 @@ set(HDRS
 )
  
 set(SRCS
-	./main.cpp
-	./MainWindow.cpp
-	./MwxGLCanvas_Mouse.cpp
-	./OpenGLWindow.cpp
+	./main.cxx
+	./MainWindow.cxx
+	./MwxGLCanvas_Mouse.cxx
+	./OpenGLWindow.cxx
 	./acHouseEngine.cxx
 	./Constraints.cxx
 )

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <wx/sizer.h>
 #include <wx/msgdlg.h>
-//#include <wx/dcclient.h>      // For wxPaintDC(this)
 
 #include "MainWindow.h"
 
@@ -31,11 +30,13 @@ MainWindow::MainWindow(wxFrame* parent)
                         WX_GL_DEPTH_SIZE, 16,
                         0, 0};
 
+    //create splitter window with the gl canvas and a property grid
     m_acSplitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition,
 		    wxDefaultSize, wxSP_3D);
     m_acProperty = new wxPropertyGrid(m_acSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		    wxPG_SPLITTER_AUTO_CENTER | wxPG_DEFAULT_STYLE);
 
+    //Add properties
     m_acProperty->Append(new wxPropertyCategory("Base Dimension Constraints"));
     minWidth  = m_acProperty->Append(new wxFloatProperty("Min Width ",wxPG_LABEL, 1.0f));
     maxWidth  = m_acProperty->Append(new wxFloatProperty("Max Width ",wxPG_LABEL, 2.0f));
@@ -110,7 +111,7 @@ MainWindow::MainWindow(wxFrame* parent)
 
 MainWindow::~MainWindow()
 {
-    //dtor
+    //free allocated memory
     delete m_GLCanvas;
     delete m_GLContext;
 }
@@ -151,6 +152,7 @@ void MainWindow::PropDirChange(wxString str)
 
 void MainWindow::OnMenuEditGenHouse(wxCommandEvent& event)
 {
+	//Get values from property grid, store in constraints object
 	wxAny value1 = minWidth->GetValue();
 	wxAny value2 = maxWidth->GetValue();
 	wxAny value3 = minLength->GetValue();
@@ -170,7 +172,7 @@ void MainWindow::OnMenuEditGenHouse(wxCommandEvent& event)
 			value11.As<double>(), value12.As<double>());
 	m_acEngine = new acHouseEngine();
 	m_acEngine->genHouse(c);
-	delete m_ourModel;
+	delete m_ourModel;//Create new model for new obj file
 	m_ourModel = new Model();
 	m_ourModel->loadModel("./tmp/house.obj", m_shader_3DModel);
 }
@@ -188,7 +190,7 @@ void MainWindow::OnMenuEditSaveHouse(wxCommandEvent& event)
 	}
 	string savepath = saveFileDialog.GetPath().ToStdString();
 
-	//Save file
+	//Save file to specified path
 	ifstream source(str, ios::binary);
 	ofstream dest(savepath, ios::binary);
 
@@ -204,6 +206,7 @@ void MainWindow::OnMenuEditSaveHouse(wxCommandEvent& event)
 
 void MainWindow::OnMenuEditGenBuild(wxCommandEvent& event)
 {
+	//store constraints in constraints object
 	wxAny value1 = bminHeight->GetValue();
 	wxAny value2 = bmaxHeight->GetValue();
 	wxAny value3 = bminSide->GetValue();
@@ -221,6 +224,7 @@ void MainWindow::OnMenuEditGenBuild(wxCommandEvent& event)
 void MainWindow::OnMenuEditSaveBuild(wxCommandEvent& event)
 {
 
+	//save building to specified path
 	string str = "./tmp/building.obj";
 	wxFileDialog saveFileDialog(this, _("Save Building OBJ"), "", "untitled.obj", "OBJ files (*.obj)|*.obj", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	if(saveFileDialog.ShowModal() == wxID_CANCEL)
@@ -298,6 +302,8 @@ void MainWindow::OnMenuModelRotateDownSelected(wxCommandEvent& event)
 
 void MainWindow::OnMenuCameraLookAtOriginSelected(wxCommandEvent& event)
 {
+
+    //lock camera to origin
     MenuCameraTiltLeft->Enable(m_camLookAtOrigin);
     MenuCameraTiltRight->Enable(m_camLookAtOrigin);
     MenuCameraTiltUp->Enable(m_camLookAtOrigin);
@@ -377,6 +383,7 @@ void MainWindow::OnMenuCameraTiltDownSelected(wxCommandEvent& event)
 // ##### <<<<<< Beginning of User Defined Function Area >>>>> ######
 bool MainWindow::initializeGL()
 {
+    //initialize canvas and context
     m_GLContext = new wxGLContext(m_GLCanvas);
     m_GLCanvas->SetBackgroundStyle(wxBG_STYLE_CUSTOM);
     //wxPaintDC dc(this);
@@ -468,11 +475,6 @@ bool MainWindow::initLoadModel()
     wxString myString;
 
     myString = wxString(_("tmp/Cube.obj"));
-    //myString = wxString(_("../../Models/Nanosuit/nanosuit.obj"));
-    //myString = wxString(_("../../Models/Pyramids/Triangular_Pyramid_Textured.obj"));
-    //myString = wxString(_("../../Models/Pyramids/Regular_and_Triangular_Pyramids_x2_Textured.obj"));
-    //myString = wxString(_("../../Models/Porsche911_PoliceCar/Porsche911_PoliceCar.obj"));
-    //myString = wxString(_("../../Models/Porsche911_PoliceCar/Porsche911_Skin00.obj"));
 
 #ifdef USE_INTEL_GPU
     // ---------- For GLSL 1.30 ----------
@@ -483,53 +485,6 @@ bool MainWindow::initLoadModel()
     if ((m_ourModel->loadModel(myString)) ==  false)
         errorFlag = true;
 #endif
-/*
-    //myString = wxString(_("../../Models/Cube/Cube.obj"));
-    myString = wxString(_("../../Models/Nanosuit/nanosuit.obj"));
-    //myString = wxString(_("../../Models/Pyramids/Triangular_Pyramid_Textured.obj"));
-    //myString = wxString(_("../../Models/Pyramids/Regular_and_Triangular_Pyramids_x2_Textured.obj"));
-    //myString = wxString(_("../../Models/Porsche911_PoliceCar/Porsche911_PoliceCar.obj"));
-    //myString = wxString(_("../../Models/Porsche911_PoliceCar/Porsche911_Skin00.obj"));
-
-#ifdef USE_INTEL_GPU
-    // ---------- For GLSL 1.30 ----------
-    if ((m_ourModel[1].loadModel(myString, m_shader_3DModel)) ==  false)
-        errorFlag = true;
-#else
-    // ---------- For GLSL 3.30 ----------
-    if ((m_ourModel[1].loadModel(myString)) ==  false)
-        errorFlag = true;
-#endif
-
-    //myString = wxString(_("../../Models/Cube/Cube.obj"));
-    //myString = wxString(_("../../Models/Nanosuit/nanosuit.obj"));
-    //myString = wxString(_("../../Models/Pyramids/Triangular_Pyramid_Textured.obj"));
-    //myString = wxString(_("../../Models/Pyramids/Regular_and_Triangular_Pyramids_x2_Textured.obj"));
-    myString = wxString(_("../../Models/Porsche911_PoliceCar/Porsche911_PoliceCar.obj"));
-    //myString = wxString(_("../../Models/Porsche911_PoliceCar/Porsche911_Skin00.obj"));
-
-#ifdef USE_INTEL_GPU
-    // ---------- For GLSL 1.30 ----------
-    if ((m_ourModel[2].loadModel(myString, m_shader_3DModel)) ==  false)
-        errorFlag = true;
-#else
-    // ---------- For GLSL 3.30 ----------
-    if ((m_ourModel[2].loadModel(myString)) ==  false)
-        errorFlag = true;
-#endif
-
-    myString = wxString(_("../../Models/Lamp/octahedron.obj"));
-
-#ifdef USE_INTEL_GPU
-    // ---------- For GLSL 1.30 ----------
-    if ((m_ourLamp.loadModel(myString, m_shader_UniformColor)) ==  false)
-        errorFlag = true;
-#else
-    // ---------- For GLSL 3.30 ----------
-    if ((m_ourLamp.loadModel(myString)) ==  false)
-        errorFlag = true;
-#endif
-*/
     cout << "===> End of loading 3D models :-) \n" << endl;
 
     return !errorFlag;
@@ -692,14 +647,9 @@ bool MainWindow::initLoadXYPlane()
 
     return true;
 }
-/*
-bool MainWindow::initLoadTexture()
-{
-
-}
-*/
 void MainWindow::renderGL()
 {
+    //only render if ready
     if (!IsRunning || IsIconized()) return;
 
     //wxPaintDC(this);
@@ -707,6 +657,8 @@ void MainWindow::renderGL()
     //glClearColor(1.0, 0.0, 0.0, 1.0);   // Change any color you like here
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //initialize variables to read shader data
 
     static glm::mat4 Mvp;
     static bool     IsLocReady(false);
@@ -717,7 +669,7 @@ void MainWindow::renderGL()
     static GLint    Loc_Mmvp_Lamp;
     static GLint    Loc_lampColor;
     static GLint    Loc_Mmodel;
-    static GLint    Loc_Mtranspose_inverse_model;     // Add by Calvin.  02-21-2017
+    static GLint    Loc_Mtranspose_inverse_model;
     static GLint    Loc_viewPos;
     static int      count(0);
     static int      counter_render;
@@ -917,53 +869,16 @@ void MainWindow::renderGL()
         //count++;
     }
 
-    // Setup matrices and pass them to shader
-    // ********======== Matrix Transformation ========********
-    // Create transformations
-    //glm::mat4 Mtransform, Mtemp;       // Initialize as identity matrix by default
-
-    // m_Mprojection matrix has been set in resizeGL() block
-
-    // The series of doing matrix multiplications is:
-    //    Mprojection x Mview x ( Mmodel )
-    //  = Mprojection x Mview x ( Mtranslation x Mrotation )
-
-    // Since we have chosen camera view space to be coincident with world space,
-    // the view matrix becomes identity / unit matrix.
-    // So the series of matrix multiplication is reduced to:
-    //    Mprojection x ( Mtranslation x Mrotation )
-
-    //m_Mmodel = glm::translate(m_Mproj * m_Mview, glm::vec3(0.0f, 0.0f, -2.5f));
-    //Mtemp = m_Mproj * m_Mview;
-    //Mtemp = glm::translate(m_Mproj, glm::vec3(-0.5f, 0.0f, -2.0f));
-    //Mtemp = glm::rotate(Mtemp, (float)m_angle, glm::vec3(0.0f, 1.0f, 0.0f));
-    //transform = glm::rotate(Mtemp, (float)count, glm::vec3(0.0f, 1.0f, 0.0f));
-    //Mtransform = glm::rotate(Mtemp, angleRotation, glm::vec3(0.0f, 0.0f, 1.0f));
-
-    // Pass the transformation matrix to shader program
-    //glUniformMatrix4fv(Loc_transform, 1, GL_FALSE, glm::value_ptr(Mtransform));
-    // *******************************************************
-
     m_shader_3DModel.useProgram();      // ---> Select shader for 3D model <---
 
     // Draw the loaded model
     glm::mat4 Mmodel;
-    //Mmodel = glm::translate(Mmodel, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-    //Mmodel = glm::translate(Mmodel, glm::vec3(0.0f, 0.0f, 0.0f));
-    //Mmodel = glm::translate(Mmodel, glm::vec3(0.0f, 0.0f, 1.0f));
-    //Mmodel = glm::scale(Mmodel, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
     Mmodel = glm::rotate(Mmodel, angleRotation, glm::vec3(0.0f, 0.0f, 1.0f));
-    //Mmodel = glm::rotate(Mmodel, 0.7854f, glm::vec3(0.0f, 0.0f, 1.0f));        // <-- 45 degree for GLM v0.9.7.2
-    //Mmodel = glm::rotate(Mmodel, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-    //Mmodel = glm::scale(Mmodel, glm::vec3(0.14f, 0.14f, 0.14f));
-    //Mmodel = glm::scale(Mmodel, glm::vec3(0.8f, 0.8f, 0.8f));
-    //Mmodel = glm::rotate(Mmodel, (float)m_angle, glm::vec3(1.0f, 0.0f, 0.0f));                // <-- 45 degree for GLM v0.9.5
     Mmodel = glm::rotate(Mmodel, (float)m_angle * 0.0174533f, glm::vec3(1.0f, 0.0f, 0.0f));     // <-- 45 degree for GLM v0.9.7.2
-    //Mmodel = glm::rotate(Mmodel, 0.7854f, glm::vec3(1.0f, 0.0f, 0.0f));        // <-- 45 degree for GLM v0.9.7.2
     glUniformMatrix4fv(Loc_Mmodel, 1, GL_FALSE, glm::value_ptr(Mmodel));
     glUniformMatrix4fv(Loc_Mmvp, 1, GL_FALSE, glm::value_ptr(Mvp * Mmodel));
 
-    // Calculate the transpose-inverse matrix of Mmodel  // ---------------------------------- Add by Calvin.  02-21-2017
+    // Calculate the transpose-inverse matrix of Mmodel
     Mmodel = glm::transpose(glm::inverse(Mmodel));
     glUniformMatrix4fv(Loc_Mtranspose_inverse_model, 1, GL_FALSE, glm::value_ptr(Mmodel));
 
@@ -1205,6 +1120,7 @@ void MainWindow::Update_Camera_Movement(float t)
 
 void MainWindow::Calculate_Camera_Front(float yaw, float pitch)
 {
+	//use glm math functions to calculate camera dimensions
 	glm::vec3 front;
 	front.x = -cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = -sin(glm::radians(yaw)) * cos(glm::radians(pitch)) ;

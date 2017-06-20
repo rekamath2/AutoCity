@@ -1,6 +1,6 @@
 //#pragma once
-#ifndef MODEL130_H            // Added by Calvin.    2014-12-18
-#define MODEL130_H            // Added by Calvin.    2014-12-18
+#ifndef MODEL130_H   
+#define MODEL130_H   
 
 // Std. Includes
 #include <string>
@@ -14,8 +14,8 @@ using namespace std;
 #include <GL/glew.h> // Contains all the necessary OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-//#include <SOIL.h>         // Removed by Calvin.  2014-12-17
-//#include <SOIL/SOIL.h>      // Modified by Calvin. 2014-12-17
+//#include <SOIL.h>         
+//#include <SOIL/SOIL.h> 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -215,7 +215,7 @@ private:
         return textures;
     }
 
-    GLint TextureFromFile(const wxString path, wxString directory)   // If using GLuint will get "error: ambiguous old declaration", but this does not cause error in Qt.  Calvin.  2015-01-21
+    GLint TextureFromFile(const wxString path, wxString directory)
     {
         //Generate texture ID and load texture data
         wxString filename = "./tex.png";
@@ -227,8 +227,8 @@ private:
         int width,height;
         unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
 
-        if (image != NULL) std::cout << "Reading texture '" << filename << "' successfully." << endl;   // Added by Calvin.  2014-12-17
-        else std::cout << "Error: texture filename '" << filename << "' is not loaded." << endl;        // Added by Calvin.  2014-12-17
+        if (image != NULL) std::cout << "Reading texture '" << filename << "' successfully." << endl;  
+        else std::cout << "Error: texture filename '" << filename << "' is not loaded." << endl;
 
         // Assign texture to ID
         glBindTexture(GL_TEXTURE_2D, textureID);
@@ -284,4 +284,4 @@ private:
     }
 };
 
-#endif	// MODEL130_H		// Added by Calvin.  2014-12-18
+#endif

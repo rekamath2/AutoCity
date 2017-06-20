@@ -1,6 +1,6 @@
-//#pragma once				// Removed by Calvin.  2014-12-18
-#ifndef MESH_H              // Added by Calvin.    2014-12-18
-#define MESH_H              // Added by Calvin.    2014-12-18
+
+#ifndef MESH_H 
+#define MESH_H 
 
 // Std. Includes
 #include <string>
@@ -13,7 +13,7 @@ using namespace std;
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <assimp/types.h>   // Added by Calvin.  2015-08-23 (not an error, 2015!!)
+#include <assimp/types.h>
 
 struct Vertex {
     // Position
@@ -69,9 +69,9 @@ public:
                 ss << specularNr++; // Transfer GLuint to stream
             number = ss.str();
             // Now set the sampler to the correct texture unit
-            //glUniform1f(glGetUniformLocation(shader.Program, (name + number).c_str()), i);  // Assign sampler2D number to fragment shader.  Calvin.  2015-01-22
-            glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);    // Change to "1i" instead of "1f".  Calvin.  2015-01-22
-            //cout << i << ": " << (name + number).c_str() << endl;                           // Added by Calvin.  2014-12-18
+            //glUniform1f(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
+            glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
+            //cout << i << ": " << (name + number).c_str() << endl;
             // And finally bind the texture
             glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
         }
@@ -128,4 +128,4 @@ private:
     }
 };
 
-#endif // MESH_H    // Added by Calvin.  2014-12-18
+#endif // MESH_H

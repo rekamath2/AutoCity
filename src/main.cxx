@@ -7,11 +7,11 @@ class myApp : public wxApp
 public:
     virtual bool OnInit()
     {
-        MainWindow *mw = new MainWindow();
+        MainWindow *mw = new MainWindow();//Create Main Window
         if (mw)
         {
             mw->Show(true);
-            if (!(mw->initializeGL()))
+            if (!(mw->initializeGL()))//Initialize OpenGL for Main Window, check for errors
             {
                 wxMessageBox(_("InnitializeGL( ) wsa failed!"),
                          _("Error"), wxICON_ERROR);

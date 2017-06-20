@@ -53,6 +53,7 @@ class MainWindow : public OpenGLWindow
     Model           m_ourLamp;
 
     wxSplitterWindow* m_acSplitter;
+    //Property grid variables
     wxPGProperty* minWidth;
     wxPGProperty* maxWidth;
     wxPGProperty* minLength;
